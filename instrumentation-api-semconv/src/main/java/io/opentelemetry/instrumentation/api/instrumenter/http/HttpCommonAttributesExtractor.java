@@ -10,6 +10,7 @@ import static io.opentelemetry.instrumentation.api.instrumenter.http.CapturedHtt
 import static io.opentelemetry.instrumentation.api.instrumenter.http.CapturedHttpHeadersUtil.responseAttributeKey;
 import static io.opentelemetry.instrumentation.api.internal.AttributesExtractorUtil.internalSet;
 import static java.util.logging.Level.FINE;
+import static java.util.function.Predicate.not;
 
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.context.Context;
@@ -17,6 +18,7 @@ import io.opentelemetry.instrumentation.api.instrumenter.AttributesExtractor;
 import io.opentelemetry.instrumentation.api.instrumenter.net.internal.FallbackNamePortGetter;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
@@ -104,7 +106,10 @@ abstract class HttpCommonAttributesExtractor<
 
   @Nullable
   static String firstHeaderValue(List<String> values) {
-    return values.isEmpty() ? null : values.get(0);
+    return Optional.ofNullable(values)
+              .filter(not(List::isEmpty))
+              .map(list -> list.get(0))
+              .orElse(null);
   }
 
   @Nullable
